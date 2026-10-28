@@ -1,0 +1,31 @@
+@startuml ucd_scan_telemovel
+left to right direction
+title Sub-diagram - Register and pay scan-while-shopping purchases
+
+actor Customer
+
+rectangle "Item Registration and Payment System" {
+  usecase "Start scan-while-shopping purchase" as UC06
+  usecase "Weigh item in section" as UC05
+  usecase "Scan item with phone" as UC07
+  usecase UC08 as "Finish scan-while-shopping purchase
+--
+extension points
+validation"
+  usecase "Register item" as UC09
+  usecase "Pay purchase" as UC10
+}
+
+Customer -- UC06
+Customer -- UC05
+Customer -- UC07
+Customer -- UC08
+UC07 ..> UC09 : <<include>>
+UC08 ..> UC10 : <<include>>
+
+note right of UC08
+  At a Self-Service Station working in
+  Phone-Payment Mode. Extended by
+  "Validate purchase" (ucd_validacao.puml).
+end note
+@enduml

@@ -1,0 +1,20 @@
+@startuml ucd_campanhas
+left to right direction
+title Sub-diagram - Manage campaigns
+
+actor "Campaign Manager" as CM
+
+rectangle "Item Registration and Payment System" {
+  usecase "Define campaign" as UC13
+}
+
+CM -- UC13
+
+note right of UC13
+  Five kinds: Percentage Discount, Quantity Discount,
+  Coupon Campaign (issues Coupons to Customer Cards),
+  Cross Discount, Card Credit Campaign (D32).
+  Campaigns are applied in "Register item" and card
+  credit is credited in "Pay purchase" (D11, D39).
+end note
+@enduml

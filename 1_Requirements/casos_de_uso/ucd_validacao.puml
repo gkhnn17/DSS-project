@@ -1,0 +1,31 @@
+@startuml ucd_validacao
+left to right direction
+title Sub-diagram - Validate scan-while-shopping purchases
+
+actor Customer
+actor "Staff Member" as StaffMember
+actor Operator
+actor "Support Assistant" as SupportAssistant
+actor Supervisor
+actor "Loss Prevention Manager" as LPM
+
+rectangle "Item Registration and Payment System" {
+  usecase UC08 as "Finish scan-while-shopping purchase
+--
+extension points
+validation"
+  usecase "Validate purchase" as UC11
+  usecase "Register item" as UC09
+  usecase "Configure validation policy" as UC12
+}
+
+StaffMember <|- Operator
+StaffMember <|- SupportAssistant
+StaffMember <|- Supervisor
+
+Customer -- UC08
+StaffMember -- UC11
+LPM -- UC12
+UC11 ..> UC08 : <<extend>>\n(validation)\n[purchase selected by the\nstore's Validation Policy]
+UC11 ..> UC09 : <<include>>
+@enduml

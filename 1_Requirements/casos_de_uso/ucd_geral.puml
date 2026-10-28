@@ -1,0 +1,49 @@
+@startuml ucd_geral
+left to right direction
+title Use Case Model - general diagram (coarse use cases; each one is detailed in a sub-diagram)
+' One model, several diagrams (T07 s30-31). Decisions D31-D50 in decisoes_requisitos.md.
+
+actor Customer
+actor Operator
+actor "Staff Member" as StaffMember
+actor "Support Assistant" as SupportAssistant
+actor Supervisor
+actor "Loss Prevention Manager" as LPM
+actor "Campaign Manager" as CM
+
+rectangle "Item Registration and Payment System" {
+  usecase "Operate stations and queues" as GStations
+  usecase "Register and pay assisted purchases" as GAssisted
+  usecase "Register and pay self-checkout purchases" as GSelf
+  usecase "Register and pay scan-while-shopping purchases" as GPhone
+  usecase "Validate scan-while-shopping purchases" as GValidation
+  usecase "Manage campaigns" as GCampaigns
+  usecase "Correct purchases" as GCorrect
+}
+
+StaffMember <|- Operator
+StaffMember <|- SupportAssistant
+StaffMember <|- Supervisor
+
+Operator -- GStations
+Supervisor -- GStations
+Operator -- GAssisted
+Customer -- GAssisted
+Customer -- GSelf
+Customer -- GPhone
+StaffMember -- GValidation
+LPM -- GValidation
+CM -- GCampaigns
+Operator -- GCorrect
+Customer -- GCorrect
+Supervisor -- GCorrect
+LPM -- GCorrect
+
+note right of GStations : ucd_lojas.puml
+note right of GAssisted : ucd_caixa_assistida.puml
+note right of GSelf : ucd_self_checkout.puml
+note right of GPhone : ucd_scan_telemovel.puml
+note right of GValidation : ucd_validacao.puml
+note right of GCampaigns : ucd_campanhas.puml
+note right of GCorrect : ucd_correcoes.puml
+@enduml

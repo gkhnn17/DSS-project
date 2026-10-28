@@ -1,0 +1,23 @@
+@startuml ucd_self_checkout
+left to right direction
+title Sub-diagram - Register and pay self-checkout purchases
+
+actor Customer
+
+rectangle "Item Registration and Payment System" {
+  usecase "Weigh item in section" as UC05
+  usecase "Register self-checkout purchase" as UC04
+  usecase "Register item" as UC09
+  usecase "Pay purchase" as UC10
+}
+
+Customer -- UC05
+Customer -- UC04
+UC04 ..> UC09 : <<include>>
+UC04 ..> UC10 : <<include>>
+
+note right of UC04
+  At a Self-Service Station working
+  in Self-Checkout Mode (D21).
+end note
+@enduml

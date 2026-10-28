@@ -1,0 +1,24 @@
+@startuml ucd_caixa_assistida
+left to right direction
+title Sub-diagram - Register and pay assisted purchases
+
+actor Operator
+actor Customer
+
+rectangle "Item Registration and Payment System" {
+  usecase "Register assisted purchase" as UC03
+  usecase "Register item" as UC09
+  usecase "Pay purchase" as UC10
+}
+
+Operator -- UC03
+Customer -- UC03
+UC03 ..> UC09 : <<include>>
+UC03 ..> UC10 : <<include>>
+
+note right of UC03
+  Also used to register again a purchase sent
+  from a validation with Unexplained
+  Discrepancy (D4, D45).
+end note
+@enduml

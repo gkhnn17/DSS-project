@@ -1,0 +1,25 @@
+@startuml ucd_lojas
+left to right direction
+title Sub-diagram - Operate stations and queues
+
+actor Operator
+actor Supervisor
+
+rectangle "Item Registration and Payment System" {
+  usecase "Call next customer" as UC01
+  usecase "Change station mode" as UC02
+}
+
+Operator -- UC01
+Supervisor -- UC02
+
+note right of UC01
+  Only where the store has a single
+  Queue with a Display (D25, D50).
+end note
+note right of UC02
+  Self-Checkout Mode <-> Phone-Payment Mode;
+  not while a purchase is in progress
+  at the station (D34).
+end note
+@enduml

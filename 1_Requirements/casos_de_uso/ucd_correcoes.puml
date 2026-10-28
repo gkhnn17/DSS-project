@@ -1,0 +1,27 @@
+@startuml ucd_correcoes
+left to right direction
+title Sub-diagram - Correct purchases
+
+actor Customer
+actor Operator
+actor Supervisor
+actor "Loss Prevention Manager" as LPM
+
+rectangle "Item Registration and Payment System" {
+  usecase UC14 as "Void item
+--
+extension points
+authorisation"
+  usecase "Authorise void" as UC15
+  usecase "Cancel purchase" as UC16
+  usecase "Obtain monthly void report" as UC17
+}
+
+Customer -- UC14
+Operator -- UC14
+Supervisor -- UC15
+Customer -- UC16
+Operator -- UC16
+LPM -- UC17
+UC15 ..> UC14 : <<extend>>\n(authorisation)\n[voided line value above\nthe store's void threshold]
+@enduml
