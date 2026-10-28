@@ -1,0 +1,4 @@
+' Estilo DSS para Modelos de Domínio
+hide circle
+hide methods
+hide empty members

@@ -1,0 +1,62 @@
+@startuml dominio_campanhas
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+title View 4 - Campaigns, coupons and card credit (subset of dominio.puml)
+
+class "Customer Card" as CustomerCard
+class "Item Registration" as ItemRegistration {
+  registeredAt : DateTime
+  unitPrice : Decimal
+}
+class "Campaign Application" as CampaignApplication
+class "Card Credit" as CardCredit
+class "Percentage Discount" as PercentageDiscount {
+  percentage : Decimal
+}
+class "Quantity Discount" as QuantityDiscount {
+  quantityTaken : Integer
+  quantityPaid : Integer
+}
+class "Coupon Campaign" as CouponCampaign
+class "Cross Discount" as CrossDiscount
+class "Card Credit Campaign" as CardCreditCampaign
+class Campaign {
+  start : DateTime
+  end : DateTime
+}
+class Coupon {
+  expiryDate : Date
+}
+
+Campaign "*" -- "*" Product : covers >
+PercentageDiscount -up- Campaign : is a >
+QuantityDiscount -up- Campaign : is a >
+CouponCampaign -up- Campaign : is a >
+CrossDiscount -up- Campaign : is a >
+CardCreditCampaign -up- Campaign : is a >
+CrossDiscount "*" -- "1..*" Product : requires purchase of >
+CouponCampaign "1" -- "*" Coupon : issues >
+Coupon "*" -- "1" CustomerCard : issued to >
+Campaign "1" -- "*" CampaignApplication : applied as >
+CampaignApplication "*" -- "1..*" ItemRegistration : concerns >
+ItemRegistration "*" -- "1" Product : of >
+Discount -up- CampaignApplication : is a >
+CardCredit -up- CampaignApplication : is a >
+CardCredit "*" -- "1" CustomerCard : credited to >
+Discount "*" -- "0..1" Coupon : redeems >
+
+note right of CampaignApplication
+  Applies only if every line it concerns was
+  registered between start and end (D8, D10).
+  A line is concerned by at most one Campaign
+  Application (Discount or Card Credit): the one
+  most advantageous to the customer (D11).
+end note
+note bottom of CardCredit
+  Never deducted from the purchase total (D14).
+end note
+note bottom of Coupon
+  Single use: at most one redeeming Discount in a
+  purchase that is not cancelled (D13).
+end note
+@enduml

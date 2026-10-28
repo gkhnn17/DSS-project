@@ -1,0 +1,45 @@
+@startuml dominio_lojas
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+title View 1 - Stores, stations, queues, staff (subset of dominio.puml)
+
+class "Staff Member" as StaffMember
+class "Support Assistant" as SupportAssistant
+class "Assisted Checkout" as AssistedCheckout
+class "Self-Service Station" as SelfServiceStation
+class "Station Mode" as StationMode
+class "Self-Checkout Mode" as SelfCheckoutMode
+class "Phone-Payment Mode" as PhonePaymentMode
+class "Checkout Scale" as CheckoutScale
+class Station {
+  number : Integer
+}
+
+Store "1" -- "*" Station : has >
+AssistedCheckout -up- Station : is a >
+SelfServiceStation -up- Station : is a >
+SelfServiceStation "*" -- "1" StationMode : works in >
+SelfCheckoutMode -up- StationMode : is a >
+PhonePaymentMode -up- StationMode : is a >
+AssistedCheckout "1" -- "1" CheckoutScale : has >
+SelfServiceStation "1" -- "0..1" CheckoutScale : has >
+Store "1" -- "*" Queue : has >
+Queue "0..1" -- "1..*" Station : leads to >
+Display "0..1" -- "1" Queue : calls next customer from >
+Store "1" -- "*" StaffMember : employs >
+Operator -up- StaffMember : is a >
+SupportAssistant -up- StaffMember : is a >
+Supervisor -up- StaffMember : is a >
+Operator "0..1" -- "0..1" AssistedCheckout : operates >
+SupportAssistant "1" -- "1..*" SelfServiceStation : watches >
+
+note bottom of StationMode
+  Same machine, different mode; the mode is
+  changed by the store from day to day (D21).
+end note
+note right of Display
+  Only in stores with a single queue for the
+  assisted checkouts; the operator signals that
+  the checkout is free (D25).
+end note
+@enduml

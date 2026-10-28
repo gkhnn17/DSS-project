@@ -1,0 +1,56 @@
+@startuml dominio_validacao
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+title View 3 - Validation of scan-while-shopping purchases (subset of dominio.puml)
+
+class "Customer Card" as CustomerCard
+class "Staff Member" as StaffMember
+class "Assisted Purchase" as AssistedPurchase
+class "Scan-While-Shopping Purchase" as ScanWhileShoppingPurchase
+class "Item Registration" as ItemRegistration {
+  registeredAt : DateTime
+  unitPrice : Decimal
+}
+class "Validation Policy" as ValidationPolicy {
+  basePercentage : Decimal
+  amountThreshold : Decimal
+}
+class "Validation Outcome" as Outcome
+class "No Discrepancy" as NoDiscrepancy
+class "Small Discrepancy" as SmallDiscrepancy
+class "Unexplained Discrepancy" as UnexplainedDiscrepancy
+
+ScanWhileShoppingPurchase -up- Purchase : is a >
+AssistedPurchase -up- Purchase : is a >
+Purchase "*" -- "0..1" CustomerCard : identified by >
+Purchase "1" -- "*" ItemRegistration : contains >
+ItemRegistration "*" -- "1" Product : of >
+Validation "0..1" -- "1" ScanWhileShoppingPurchase : checks >
+Validation "*" -- "1" StaffMember : performed by >
+Validation "1" -- "0..1" Outcome : ends with >
+NoDiscrepancy -up- Outcome : is a >
+SmallDiscrepancy -up- Outcome : is a >
+UnexplainedDiscrepancy -up- Outcome : is a >
+SmallDiscrepancy "0..1" -- "1..*" ItemRegistration : adds >
+UnexplainedDiscrepancy "0..1" -- "1" AssistedPurchase : sends purchase to >
+ValidationPolicy "*" -- "*" Product : flags as problematic >
+Store "1" -- "1" ValidationPolicy : configures >
+
+note right of ValidationPolicy
+  Configured per store (D6): base random percentage,
+  reduced by the card's validations with No
+  Discrepancy (D5); forced above amountThreshold or
+  when a flagged product is registered.
+  No values fixed in the model.
+end note
+note bottom of Outcome
+  Small vs unexplained: decided by the validating
+  staff member, no numeric threshold (D7).
+end note
+note bottom of UnexplainedDiscrepancy
+  The scan-while-shopping purchase keeps its lines as
+  evidence but goes to state "sent to assisted checkout"
+  and is never paid; the items are registered again in
+  the new Assisted Purchase (D4).
+end note
+@enduml

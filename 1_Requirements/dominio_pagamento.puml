@@ -1,0 +1,54 @@
+@startuml dominio_pagamento
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+title View 5 - Payment instruments (subset of dominio.puml)
+
+class "Customer Card" as CustomerCard
+class "Food Product" as FoodProduct
+class "Item Registration" as ItemRegistration {
+  registeredAt : DateTime
+  unitPrice : Decimal
+}
+class "Bank Card Payment" as BankCardPayment
+class "Cash Payment" as CashPayment
+class "Meal Card Payment" as MealCardPayment
+class "Voucher Payment" as VoucherPayment
+class "Card Balance Payment" as CardBalancePayment
+class "Return Voucher" as ReturnVoucher {
+  amount : Decimal
+}
+class Payment {
+  amount : Decimal
+  sequence : Integer
+}
+
+Payment "*" -- "1" Purchase : settles >
+Purchase "1" -- "*" ItemRegistration : contains >
+ItemRegistration "*" -- "1" Product : of >
+FoodProduct -up- Product : is a >
+BankCardPayment -up- Payment : is a >
+CashPayment -up- Payment : is a >
+MealCardPayment -up- Payment : is a >
+VoucherPayment -up- Payment : is a >
+CardBalancePayment -up- Payment : is a >
+VoucherPayment "*" -- "1" ReturnVoucher : redeems >
+CardBalancePayment "*" -- "1" CustomerCard : draws on >
+
+note right of Payment
+  sequence = order of application (D16):
+  return vouchers, meal card, card balance,
+  then bank card / cash.
+  Cancelled purchase (D19): voucher and card-balance
+  payments undone; bank card / cash follow the store
+  refund process (outside the system).
+end note
+note bottom of MealCardPayment
+  Amount <= value of the not-voided Food Product
+  lines, after their discounts (D17).
+end note
+note bottom of ReturnVoucher
+  Arrives already issued (D18). Single use;
+  unused remainder is lost; restored if the
+  purchase is cancelled (D19).
+end note
+@enduml

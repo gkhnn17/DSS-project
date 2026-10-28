@@ -1,0 +1,250 @@
+@startuml dominio
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+skinparam nodesep 40
+skinparam ranksep 60
+title Domain Model - supermarket item registration and payment (complete model)
+' Every element is supported by Appendix A or by a decision in decisoes_dominio.md (D<n>).
+' Views with fewer elements: dominio_lojas.puml, dominio_compras.puml,
+' dominio_validacao.puml, dominio_campanhas.puml, dominio_pagamento.puml
+
+' ---------- names with spaces ----------
+class "Customer Card" as CustomerCard
+class "Staff Member" as StaffMember
+class "Support Assistant" as SupportAssistant
+class "Assisted Checkout" as AssistedCheckout
+class "Self-Service Station" as SelfServiceStation
+class "Station Mode" as StationMode
+class "Self-Checkout Mode" as SelfCheckoutMode
+class "Phone-Payment Mode" as PhonePaymentMode
+class "Section Scale" as SectionScale
+class "Checkout Scale" as CheckoutScale
+class "Assisted Purchase" as AssistedPurchase
+class "Self-Checkout Purchase" as SelfCheckoutPurchase
+class "Scan-While-Shopping Purchase" as ScanWhileShoppingPurchase
+class "Purchase State" as PurchaseState
+class "Food Product" as FoodProduct
+class "Validation Policy" as ValidationPolicy {
+  basePercentage : Decimal
+  amountThreshold : Decimal
+}
+class "Validation Outcome" as Outcome
+class "No Discrepancy" as NoDiscrepancy
+class "Small Discrepancy" as SmallDiscrepancy
+class "Unexplained Discrepancy" as UnexplainedDiscrepancy
+class "Campaign Application" as CampaignApplication
+class "Card Credit" as CardCredit
+class "Percentage Discount" as PercentageDiscount {
+  percentage : Decimal
+}
+class "Quantity Discount" as QuantityDiscount {
+  quantityTaken : Integer
+  quantityPaid : Integer
+}
+class "Coupon Campaign" as CouponCampaign
+class "Cross Discount" as CrossDiscount
+class "Card Credit Campaign" as CardCreditCampaign
+class "Bank Card Payment" as BankCardPayment
+class "Cash Payment" as CashPayment
+class "Meal Card Payment" as MealCardPayment
+class "Voucher Payment" as VoucherPayment
+class "Card Balance Payment" as CardBalancePayment
+class "Return Voucher" as ReturnVoucher {
+  amount : Decimal
+}
+class "Item Registration" as ItemRegistration {
+  registeredAt : DateTime
+  unitPrice : Decimal
+}
+class Station {
+  number : Integer
+}
+class Weighing {
+  weight : Decimal
+  weighedAt : DateTime
+  price : Decimal
+}
+class Label {
+  code : String
+}
+class Campaign {
+  start : DateTime
+  end : DateTime
+}
+class Coupon {
+  expiryDate : Date
+}
+class Payment {
+  amount : Decimal
+  sequence : Integer
+}
+class Void {
+  voidedAt : DateTime
+}
+
+' ---------- stores, stations, queues, staff ----------
+Store "1" -- "*" Station : has >
+AssistedCheckout -up- Station : is a >
+SelfServiceStation -up- Station : is a >
+SelfServiceStation "*" -- "1" StationMode : works in >
+SelfCheckoutMode -up- StationMode : is a >
+PhonePaymentMode -up- StationMode : is a >
+AssistedCheckout "1" -- "1" CheckoutScale : has >
+SelfServiceStation "1" -- "0..1" CheckoutScale : has >
+Store "1" -- "*" Queue : has >
+Queue "0..1" -- "1..*" Station : leads to >
+Display "0..1" -- "1" Queue : calls next customer from >
+Store "1" -- "*" StaffMember : employs >
+Operator -up- StaffMember : is a >
+SupportAssistant -up- StaffMember : is a >
+Supervisor -up- StaffMember : is a >
+Operator "0..1" -- "0..1" AssistedCheckout : operates >
+SupportAssistant "1" -- "1..*" SelfServiceStation : watches >
+
+' ---------- person, card, phone ----------
+Person "1" -- "1..*" CustomerCard : owns >
+
+' ---------- purchases and registrations ----------
+Purchase "*" -- "1" Store : made in >
+Purchase "*" -- "0..1" CustomerCard : identified by >
+AssistedPurchase -up- Purchase : is a >
+SelfCheckoutPurchase -up- Purchase : is a >
+ScanWhileShoppingPurchase -up- Purchase : is a >
+Purchase "*" -- "1" PurchaseState : is in >
+AssistedPurchase "*" -- "1" Operator : registered by >
+Purchase "*" -- "0..1" Station : paid at >
+Purchase "1" -- "*" ItemRegistration : contains >
+ItemRegistration "*" -- "1" Product : of >
+FoodProduct -up- Product : is a >
+
+' ---------- weighed items ----------
+SectionScale "1" -- "*" Weighing : performs >
+CheckoutScale "1" -- "*" Weighing : performs >
+Weighing "*" -- "1" Product : of >
+Weighing "1" -- "0..1" Label : printed on >
+ItemRegistration "0..1" -- "0..1" Weighing : priced by >
+
+' ---------- voids ----------
+Void "0..1" -- "1" ItemRegistration : cancels >
+Void "*" -- "0..1" Supervisor : authorised by >
+
+' ---------- validation ----------
+Validation "0..1" -- "1" ScanWhileShoppingPurchase : checks >
+Validation "*" -- "1" StaffMember : performed by >
+Validation "1" -- "0..1" Outcome : ends with >
+NoDiscrepancy -up- Outcome : is a >
+SmallDiscrepancy -up- Outcome : is a >
+UnexplainedDiscrepancy -up- Outcome : is a >
+SmallDiscrepancy "0..1" -- "1..*" ItemRegistration : adds >
+UnexplainedDiscrepancy "0..1" -- "1" AssistedPurchase : sends purchase to >
+ValidationPolicy "*" -- "*" Product : flags as problematic >
+Store "1" -- "1" ValidationPolicy : configures >
+
+' ---------- campaigns ----------
+Campaign "*" -- "*" Product : covers >
+PercentageDiscount -up- Campaign : is a >
+QuantityDiscount -up- Campaign : is a >
+CouponCampaign -up- Campaign : is a >
+CrossDiscount -up- Campaign : is a >
+CardCreditCampaign -up- Campaign : is a >
+CrossDiscount "*" -- "1..*" Product : requires purchase of >
+CouponCampaign "1" -- "*" Coupon : issues >
+Coupon "*" -- "1" CustomerCard : issued to >
+Campaign "1" -- "*" CampaignApplication : applied as >
+CampaignApplication "*" -- "1..*" ItemRegistration : concerns >
+Discount -up- CampaignApplication : is a >
+CardCredit -up- CampaignApplication : is a >
+CardCredit "*" -- "1" CustomerCard : credited to >
+Discount "*" -- "0..1" Coupon : redeems >
+
+' ---------- payments ----------
+Payment "*" -- "1" Purchase : settles >
+BankCardPayment -up- Payment : is a >
+CashPayment -up- Payment : is a >
+MealCardPayment -up- Payment : is a >
+VoucherPayment -up- Payment : is a >
+CardBalancePayment -up- Payment : is a >
+VoucherPayment "*" -- "1" ReturnVoucher : redeems >
+CardBalancePayment "*" -- "1" CustomerCard : draws on >
+
+' ---------- constraints the diagram cannot express ----------
+note top of Purchase
+  Mode constraints (D3, D21):
+  - Assisted Purchase is paid at an Assisted Checkout;
+  - Self-Checkout Purchase is registered and paid at a
+    Self-Service Station working in Self-Checkout Mode;
+  - Scan-While-Shopping Purchase is paid at a Self-Service
+    Station working in Phone-Payment Mode and must be
+    identified by a Customer Card (D24).
+  Purchase State: open, awaiting validation, paid, cancelled,
+  sent to assisted checkout (D4, D19).
+end note
+
+note right of ItemRegistration
+  unitPrice = price in force at registeredAt; campaigns are
+  evaluated at registeredAt, never at payment time (D8).
+  If priced by a Weighing: unitPrice = Weighing.price, i.e.
+  the price at weighing time (D9).
+  A line counts for payment only if it has no Void and its
+  Purchase is not "sent to assisted checkout" (D4).
+  A line is concerned by at most one Campaign Application:
+  the one most advantageous to the customer (D11).
+end note
+
+note bottom of Weighing
+  Each Weighing is performed by exactly one scale (Section
+  Scale or Checkout Scale); a Label is printed only for
+  Section Scale weighings (D22).
+  A weighed product in a Scan-While-Shopping Purchase must be
+  priced by a labelled Weighing (D30).
+end note
+
+note bottom of Coupon
+  Single use: at most one Discount redeeming a Coupon may
+  belong to a purchase that is not cancelled; a cancelled
+  purchase makes the coupon available again (D13, D19).
+  Not usable after expiryDate.
+end note
+
+note bottom of ReturnVoucher
+  Arrives already issued (D18). Single use (same rule as
+  Coupon, restored if the purchase is cancelled, D19); the
+  part of the amount not used in the purchase is lost.
+end note
+
+note bottom of MealCardPayment
+  Amount <= value of the not-voided Food Product lines of
+  the purchase, after their discounts (D17).
+end note
+
+note bottom of CardCredit
+  Never deducted from the purchase total; credited to the
+  card for later purchases (D14). Requires an identified card.
+end note
+
+note bottom of Payment
+  sequence = fixed order of application (D16): return
+  vouchers, meal card, card balance, bank card / cash.
+  Cancelled purchase (D19): voucher and card-balance payments
+  are undone (voucher and balance available again); money
+  already paid by bank card / cash follows the store refund
+  process, outside the system.
+end note
+
+note bottom of ValidationPolicy
+  Configured per store (D6): base random percentage, reduced
+  by the card's validations with No Discrepancy (D5); forced
+  above amountThreshold or when a flagged product is
+  registered. No values fixed in the model.
+end note
+
+note bottom of Outcome
+  Small vs unexplained is decided by the validating staff
+  member, no numeric threshold (D7).
+end note
+
+note bottom of Void
+  Authorisation by a Supervisor is required when the voided
+  line value is above the threshold set by the store (D20).
+end note
+@enduml

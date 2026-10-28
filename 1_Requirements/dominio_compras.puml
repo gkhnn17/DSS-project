@@ -1,0 +1,78 @@
+@startuml dominio_compras
+!include dss-dominio.iuml
+skinparam minClassWidth 120
+title View 2 - Purchases, registrations, weighed items, voids, customer card (subset of dominio.puml)
+
+class "Customer Card" as CustomerCard
+class "Assisted Purchase" as AssistedPurchase
+class "Self-Checkout Purchase" as SelfCheckoutPurchase
+class "Scan-While-Shopping Purchase" as ScanWhileShoppingPurchase
+class "Purchase State" as PurchaseState
+class "Food Product" as FoodProduct
+class "Assisted Checkout" as AssistedCheckout
+class "Self-Service Station" as SelfServiceStation
+class "Section Scale" as SectionScale
+class "Checkout Scale" as CheckoutScale
+class "Item Registration" as ItemRegistration {
+  registeredAt : DateTime
+  unitPrice : Decimal
+}
+class Station {
+  number : Integer
+}
+class Weighing {
+  weight : Decimal
+  weighedAt : DateTime
+  price : Decimal
+}
+class Label {
+  code : String
+}
+class Void {
+  voidedAt : DateTime
+}
+
+Person "1" -- "1..*" CustomerCard : owns >
+Purchase "*" -- "1" Store : made in >
+Purchase "*" -- "0..1" CustomerCard : identified by >
+AssistedPurchase -up- Purchase : is a >
+SelfCheckoutPurchase -up- Purchase : is a >
+ScanWhileShoppingPurchase -up- Purchase : is a >
+Purchase "*" -- "1" PurchaseState : is in >
+AssistedPurchase "*" -- "1" Operator : registered by >
+Purchase "*" -- "0..1" Station : paid at >
+Purchase "1" -- "*" ItemRegistration : contains >
+ItemRegistration "*" -- "1" Product : of >
+FoodProduct -up- Product : is a >
+SectionScale "1" -- "*" Weighing : performs >
+CheckoutScale "1" -- "*" Weighing : performs >
+AssistedCheckout "1" -- "1" CheckoutScale : has >
+SelfServiceStation "1" -- "0..1" CheckoutScale : has >
+AssistedCheckout -up- Station : is a >
+SelfServiceStation -up- Station : is a >
+Weighing "*" -- "1" Product : of >
+Weighing "1" -- "0..1" Label : printed on >
+ItemRegistration "0..1" -- "0..1" Weighing : priced by >
+Void "0..1" -- "1" ItemRegistration : cancels >
+Void "*" -- "0..1" Supervisor : authorised by >
+
+note right of ItemRegistration
+  unitPrice = price in force at registeredAt (D8);
+  if priced by a Weighing: price at weighing time (D9).
+  Counts for payment only if not voided and its purchase
+  was not sent to assisted checkout (D4).
+end note
+note bottom of Weighing
+  Performed by exactly one scale (Section or Checkout
+  Scale, D22). Label only for Section Scale weighings; weighed
+  products in a Scan-While-Shopping Purchase need a
+  labelled Weighing (D30).
+end note
+note top of ScanWhileShoppingPurchase
+  Must be identified by a Customer Card (D24).
+end note
+note bottom of Void
+  Supervisor authorisation required above the
+  store threshold; monthly report derived (D20).
+end note
+@enduml
