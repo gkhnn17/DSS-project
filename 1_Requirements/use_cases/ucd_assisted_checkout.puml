@@ -1,5 +1,27 @@
-@startuml ucd_caixa_assistida
+@startuml ucd_assisted_checkout
 left to right direction
+skinparam backgroundColor White
+skinparam ArrowColor Black
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
 title Sub-diagram - Register and pay assisted purchases
 
 actor Operator

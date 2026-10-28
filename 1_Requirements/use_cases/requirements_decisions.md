@@ -1,9 +1,9 @@
 # Decision log: Use Case Model (Phase 1)
 
-Continues `../decisoes_dominio.md` (D1-D30). Model files: `ucd_geral.puml` and the sub-diagrams
-`ucd_lojas.puml`, `ucd_caixa_assistida.puml`, `ucd_self_checkout.puml`, `ucd_scan_telemovel.puml`,
-`ucd_validacao.puml`, `ucd_campanhas.puml`, `ucd_correcoes.puml`; scenarios in `cenarios.md`;
-specifications in `especificacoes_use_cases.md`.
+Continues `../domain_decisions.md` (D1-D30; D51-D55 were added there after the use case model).
+Model files: `ucd_general.puml` and the sub-diagrams `ucd_stores.puml`, `ucd_assisted_checkout.puml`,
+`ucd_self_checkout.puml`, `ucd_phone_scan.puml`, `ucd_validation.puml`, `ucd_campaigns.puml`, `ucd_corrections.puml`; scenarios in `scenarios.md`;
+specifications in `use_case_specifications.md`.
 Tags: **[confirm with forum]** = default that depends on a client answer on the forum.
 
 ## Actors
@@ -15,7 +15,7 @@ Loss Prevention Manager and Campaign Manager. Display, scales, phone app and sta
 system; payment terminal, bank and meal-card issuer are not actors.
 Justification: T07 balanced rule: only external parties that need functionality from the system. The
 staff generalisation mirrors D27 ("a staff member comes to check").
-Depends: all diagrams, actor list in `cenarios.md`.
+Depends: all diagrams, actor list in `scenarios.md`.
 
 **D32 – Campaigns are defined by a Campaign Manager**
 Open question: who defines campaigns? The transcript does not say (forum Q5).
@@ -23,7 +23,7 @@ Decision: a Campaign Manager actor (the role of Marisa, "loyalty programme and c
 campaigns of the five kinds, chain-wide (D28), including the issuing of personal coupons.
 Justification: Marisa is the one who describes and "designs" campaigns ("from the point of view of whoever
 designs it"); the system cannot apply campaigns that nobody defines.
-Depends: UC13, `ucd_campanhas.puml`. [confirm with forum]
+Depends: UC13, `ucd_campaigns.puml`. [confirm with forum]
 
 **D33 – The validation policy is configured by a Loss Prevention Manager**
 Open question: who configures the selection rule, given Hélder vs Sandra ("it's not going to be settled
@@ -32,7 +32,7 @@ Decision: a Loss Prevention Manager actor sets, per store (D6), the base percent
 checks and the flagged products.
 Justification: Hélder (loss prevention) asks to "be able to force a check under certain conditions", and
 the transcript leaves the trade-off to the business, not to the system.
-Depends: UC12, `ucd_validacao.puml`. [confirm with forum]
+Depends: UC12, `ucd_validation.puml`. [confirm with forum]
 
 **D34 – Station mode is changed by a Supervisor, never during a purchase**
 Open question: who switches self-service stations between modes, and when (forum Q5)?
@@ -47,7 +47,7 @@ Open question: what does the support assistant do in the system?
 Decision: "watching six or eight stations" is a physical activity with no system function in the
 transcript. The Support Assistant appears only as a Staff Member who may validate purchases (UC11).
 Justification: adding monitoring functions would be an unsupported addition (assignment section 8).
-Depends: actor generalisation in `ucd_geral.puml`, `ucd_validacao.puml`. [confirm with forum]
+Depends: actor generalisation in `ucd_general.puml`, `ucd_validation.puml`. [confirm with forum]
 
 **D36 – The monthly void report lists authorised voids and goes to loss prevention**
 Open question: who receives the report, and which voids does it contain?
@@ -78,7 +78,7 @@ selected by the store's Validation Policy]; "Authorise void" extends "Void item"
 Justification: both add behaviour under a condition, with a different actor; the base use cases are
 complete without them (most purchases are not checked, most voids are small). No other include/extend is
 used.
-Depends: `ucd_validacao.puml`, `ucd_correcoes.puml`, UC08, UC11, UC14, UC15.
+Depends: `ucd_validation.puml`, `ucd_corrections.puml`, UC08, UC11, UC14, UC15.
 
 ## Campaigns, card and payment
 
@@ -163,7 +163,7 @@ Decision: the transcript is silent; these are treated as data that already exist
 outside the scope of this model), and appear only in pre-conditions.
 Justification: the system cannot work without them, but no stakeholder described how they are maintained;
 adding management use cases would be unsupported. Voucher issuing is already out of scope (D18).
-Depends: conventions in `especificacoes_use_cases.md`, UC01, UC03. [confirm with forum]
+Depends: conventions in `use_case_specifications.md`, UC01, UC03. [confirm with forum]
 
 **D49 – Payment split is computed once all instruments are known; refusals are alternative flows**
 Open question: how is the fixed order (D16) applied when the customer offers several instruments, and what
@@ -185,16 +185,15 @@ Depends: UC01.
 
 ## Domain model gaps found while writing the use cases
 
-The domain model was **not** changed. The use cases refer to the following values that have no place in
-`../dominio.puml` yet; the group should decide whether to add them (proposal in brackets):
-- Price of a Product at a given moment (UC05, UC09): Product has no price [`Product.price`: the current
-  price is enough, because Item Registration.unitPrice and Weighing.price keep the snapshot, D8/D9].
-- Product sold by weight (UC09 alternative 2 and exception 3) [`Product.soldByWeight : Boolean`].
-- Store void threshold (UC14, UC15, D20) [`Store.voidThreshold : Decimal`].
-- Value of Cross Discount, Coupon Campaign and Card Credit Campaign (UC13): only Percentage Discount has a
-  value attribute [a value / percentage attribute on each].
-- How much clean history reduces the selection chance (UC08 step 4, D5/D6) is not a Validation Policy
-  attribute [leave as a fixed rule, or add a parameter].
+The use cases referred to five values that had no place in `../domain.puml`. They are now closed in the
+domain model and recorded in `../domain_decisions.md`:
+- Current price of a Product (UC05, UC09): `Product.price` (D51).
+- Product sold by weight (UC05, UC09 alternative 2 and exception 3): Weighed Product "is a" Product (D52).
+- Store void threshold (UC14, UC15, D20): `Store.voidThreshold` (D53).
+- Value of Cross Discount, Coupon Campaign and Card Credit Campaign (UC09, UC13): `percentage` on the two
+  discounts, `amount` on the card credit campaign (D54).
+- Reduction of the selection chance by clean history (UC08 step 4, UC12): `cleanHistoryReduction`
+  on Validation Policy (D55).
 
 ## Left out on purpose
 - **Log-in of operators and staff, and assigning an operator to a checkout**: not in the transcript;

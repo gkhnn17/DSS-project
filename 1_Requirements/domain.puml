@@ -1,12 +1,12 @@
-@startuml dominio
+@startuml domain
 !include dss-dominio.iuml
 skinparam minClassWidth 120
 skinparam nodesep 40
 skinparam ranksep 60
 title Domain Model - supermarket item registration and payment (complete model)
-' Every element is supported by Appendix A or by a decision in decisoes_dominio.md (D<n>).
-' Views with fewer elements: dominio_lojas.puml, dominio_compras.puml,
-' dominio_validacao.puml, dominio_campanhas.puml, dominio_pagamento.puml
+' Every element is supported by Appendix A or by a decision in domain_decisions.md (D<n>).
+' Views with fewer elements: domain_stores.puml, domain_purchases.puml,
+' domain_validation.puml, domain_campaigns.puml, domain_payment.puml
 
 ' ---------- names with spaces ----------
 class "Customer Card" as CustomerCard
@@ -24,9 +24,17 @@ class "Self-Checkout Purchase" as SelfCheckoutPurchase
 class "Scan-While-Shopping Purchase" as ScanWhileShoppingPurchase
 class "Purchase State" as PurchaseState
 class "Food Product" as FoodProduct
+class "Weighed Product" as WeighedProduct
+class Product {
+  price : Decimal
+}
+class Store {
+  voidThreshold : Decimal
+}
 class "Validation Policy" as ValidationPolicy {
   basePercentage : Decimal
   amountThreshold : Decimal
+  cleanHistoryReduction : Decimal
 }
 class "Validation Outcome" as Outcome
 class "No Discrepancy" as NoDiscrepancy
@@ -41,9 +49,15 @@ class "Quantity Discount" as QuantityDiscount {
   quantityTaken : Integer
   quantityPaid : Integer
 }
-class "Coupon Campaign" as CouponCampaign
-class "Cross Discount" as CrossDiscount
-class "Card Credit Campaign" as CardCreditCampaign
+class "Coupon Campaign" as CouponCampaign {
+  percentage : Decimal
+}
+class "Cross Discount" as CrossDiscount {
+  percentage : Decimal
+}
+class "Card Credit Campaign" as CardCreditCampaign {
+  amount : Decimal
+}
 class "Bank Card Payment" as BankCardPayment
 class "Cash Payment" as CashPayment
 class "Meal Card Payment" as MealCardPayment
@@ -116,11 +130,12 @@ Purchase "*" -- "0..1" Station : paid at >
 Purchase "1" -- "*" ItemRegistration : contains >
 ItemRegistration "*" -- "1" Product : of >
 FoodProduct -up- Product : is a >
+WeighedProduct -up- Product : is a >
 
 ' ---------- weighed items ----------
 SectionScale "1" -- "*" Weighing : performs >
 CheckoutScale "1" -- "*" Weighing : performs >
-Weighing "*" -- "1" Product : of >
+Weighing "*" -- "1" WeighedProduct : of >
 Weighing "1" -- "0..1" Label : printed on >
 ItemRegistration "0..1" -- "0..1" Weighing : priced by >
 
@@ -180,6 +195,20 @@ note top of Purchase
   sent to assisted checkout (D4, D19).
 end note
 
+note bottom of Product
+  price = current price (D51); for a Weighed Product it is
+  the price per unit of weight, and Weighing.price =
+  weight x price at weighedAt. A product may be both a
+  Food Product and a Weighed Product (D52).
+end note
+
+note bottom of CampaignApplication
+  Value of a Discount: percentage of the line's unitPrice
+  (Percentage, Cross, Coupon), or the unpaid units of
+  Quantity Discount; value of a Card Credit: amount per
+  covered line (D54).
+end note
+
 note right of ItemRegistration
   unitPrice = price in force at registeredAt; campaigns are
   evaluated at registeredAt, never at payment time (D8).
@@ -233,9 +262,10 @@ end note
 
 note bottom of ValidationPolicy
   Configured per store (D6): base random percentage, reduced
-  by the card's validations with No Discrepancy (D5); forced
-  above amountThreshold or when a flagged product is
-  registered. No values fixed in the model.
+  by cleanHistoryReduction percentage points for each past
+  validation of the card with No Discrepancy, never below 0
+  (D5, D55); forced above amountThreshold or when a flagged
+  product is registered. No values fixed in the model.
 end note
 
 note bottom of Outcome
@@ -245,6 +275,6 @@ end note
 
 note bottom of Void
   Authorisation by a Supervisor is required when the voided
-  line value is above the threshold set by the store (D20).
+  line value is above Store.voidThreshold (D20, D53).
 end note
 @enduml

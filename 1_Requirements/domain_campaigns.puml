@@ -1,7 +1,7 @@
-@startuml dominio_campanhas
+@startuml domain_campaigns
 !include dss-dominio.iuml
 skinparam minClassWidth 120
-title View 4 - Campaigns, coupons and card credit (subset of dominio.puml)
+title View 4 - Campaigns, coupons and card credit (subset of domain.puml)
 
 class "Customer Card" as CustomerCard
 class "Item Registration" as ItemRegistration {
@@ -17,9 +17,18 @@ class "Quantity Discount" as QuantityDiscount {
   quantityTaken : Integer
   quantityPaid : Integer
 }
-class "Coupon Campaign" as CouponCampaign
-class "Cross Discount" as CrossDiscount
-class "Card Credit Campaign" as CardCreditCampaign
+class Product {
+  price : Decimal
+}
+class "Coupon Campaign" as CouponCampaign {
+  percentage : Decimal
+}
+class "Cross Discount" as CrossDiscount {
+  percentage : Decimal
+}
+class "Card Credit Campaign" as CardCreditCampaign {
+  amount : Decimal
+}
 class Campaign {
   start : DateTime
   end : DateTime
@@ -51,6 +60,10 @@ note right of CampaignApplication
   A line is concerned by at most one Campaign
   Application (Discount or Card Credit): the one
   most advantageous to the customer (D11).
+  Discount value: percentage of the line's unitPrice
+  (Percentage, Cross, Coupon) or the unpaid units
+  (Quantity); Card Credit: amount per covered
+  line (D54).
 end note
 note bottom of CardCredit
   Never deducted from the purchase total (D14).

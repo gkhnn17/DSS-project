@@ -3,16 +3,17 @@
 Template of the course (T05, PL4 sheet): Use Case / Description / Scenarios / Pre-condition /
 Post-condition / Normal flow / Alternative flows / Exception flows. Flow notation: `(n) [condition]
 (step x)` with sub-steps `x.1, x.2 ...`; "Return to x" resumes the normal flow; an exception flow ends
-the use case without the post-condition. Scenarios S1-S18 are in `cenarios.md`; D1-D30 in
-`../decisoes_dominio.md`, D31-D50 in `decisoes_requisitos.md`.
+the use case without the post-condition. Scenarios S1-S18 are in `scenarios.md`; D1-D30 and D51-D55
+in `../domain_decisions.md`, D31-D50 in `requirements_decisions.md`.
 
 Conventions used in all specifications:
 - A **counting line** is an Item Registration of the purchase that has no Void and whose Purchase is not
   "sent to assisted checkout" (D4).
 - The **total** of a purchase is the value of its counting lines after their Discounts. Card Credits are
   never deducted from it (D14). Totals and balances are derived, not stored (D2).
-- Products, their current prices, the Food Product classification, stores, stations, queues, displays,
-  staff, customer cards and return vouchers already exist in the system (D48).
+- Products, their current prices (Product.price, D51), the Food Product and Weighed Product
+  classification (D52), stores and their void thresholds (Store.voidThreshold, D53), stations, queues,
+  displays, staff, customer cards and return vouchers already exist in the system (D48).
 
 ---
 
@@ -158,7 +159,7 @@ state "paid", and its Payments settle its total.
 ## UC05 – Weigh item in section
 
 **Use Case:** Weigh item in section
-**Description:** The customer weighs a product sold by weight on a section scale, which prints a label
+**Description:** The customer weighs a Weighed Product on a section scale, which prints a label
 with the code and the price computed at that moment. Actor: Customer.
 **Scenarios:** S4, S6, S7
 **Pre-condition:** The Section Scale belongs to the Store (D22).
@@ -166,9 +167,9 @@ with the code and the price computed at that moment. Actor: Customer.
 and price, and a Label with its code is printed for it.
 
 **Normal flow:**
-1. Customer places the product on the section scale and indicates the Product.
-2. System records a Weighing of the Product performed by the Section Scale, with the weight, weighedAt =
-   now and the price computed from the Product's price at that moment (D9).
+1. Customer places the product on the section scale and indicates the Weighed Product.
+2. System records a Weighing of the Weighed Product performed by the Section Scale, with the weight,
+   weighedAt = now and price = weight x the Product's price at that moment (D9, D51, D52).
 3. System prints a Label with the code of that Weighing.
 
 **Alternative flows:** none.
@@ -246,9 +247,10 @@ Actor: Customer. Extension point: *validation* (after step 4).
 2. System fetches the Scan-While-Shopping Purchase in state "open" identified by that card in the Store
    and records that it is paid at this station (from now on no item can be scanned with the phone).
 3. System presents the counting lines and the total.
-4. System applies the Store's Validation Policy to the purchase (base percentage reduced by the card's
-   past validations with No Discrepancy; forced above amountThreshold or when a flagged Product is among
-   the counting lines) and the purchase is not selected (D5, D6, D46).
+4. System applies the Store's Validation Policy to the purchase (basePercentage reduced by
+   cleanHistoryReduction for each past Validation of the card ended with No Discrepancy, never below 0;
+   forced above amountThreshold or when a flagged Product is among the counting lines) and the purchase
+   is not selected (D5, D6, D46, D55).
    *Extension point: validation.*
 5. «include» Pay purchase.
 
@@ -285,7 +287,7 @@ advantageous to the customer.
 **Normal flow:**
 1. Actor scans the Product.
 2. System records an Item Registration of the Product in the Purchase, with registeredAt = now and
-   unitPrice = the Product's price at that moment (D8, D26).
+   unitPrice = the Product's price at that moment (D8, D26, D51).
 3. System re-evaluates the Campaign Applications of the counting lines: each line gets at most one, the
    most advantageous to the customer (D11), among the Campaigns covering it whose period contains the
    registration time of every line concerned (D10). Coupons issued to the Purchase's Customer Card (not
@@ -301,14 +303,14 @@ advantageous to the customer.
   price, and campaigns for this line are evaluated at weighedAt (D9).
 - 1.3. Return to 3.
 
-(2) [the product is sold by weight, has no Label, and the Station has a Checkout Scale] (step 1)
+(2) [the Product is a Weighed Product, has no Label, and the Station has a Checkout Scale] (step 1)
 - 1.1. Actor places the product on the Checkout Scale.
-- 1.2. System records a Weighing performed by the Checkout Scale (weight, weighedAt = now, price) and an
-  Item Registration priced by it (D22).
+- 1.2. System records a Weighing of the Weighed Product performed by the Checkout Scale (weight,
+  weighedAt = now, price = weight x the Product's price) and an Item Registration priced by it (D22, D52).
 - 1.3. Return to 3.
 
 **Exception flows:**
-(3) [the product is sold by weight, has no Label, and no Checkout Scale is available (Scan-While-Shopping
+(3) [the Product is a Weighed Product, has no Label, and no Checkout Scale is available (Scan-While-Shopping
 Purchase, or Self-Service Station without a scale)] (step 1)
 - 1.1. System does not register the item.
 - 1.2. System informs the actor that the product must be weighed in the section (D30).
@@ -426,15 +428,16 @@ assisted checkout" (Unexplained Discrepancy).
 for validation. Actor: Loss Prevention Manager.
 **Scenarios:** S11
 **Pre-condition:** none.
-**Post-condition:** The Store configures a Validation Policy with the basePercentage, amountThreshold and
-flagged Products indicated.
+**Post-condition:** The Store configures a Validation Policy with the basePercentage,
+cleanHistoryReduction, amountThreshold and flagged Products indicated.
 
 **Normal flow:**
 1. Loss Prevention Manager indicates the Store.
 2. System presents the Store's current Validation Policy.
-3. Loss Prevention Manager indicates the base percentage, the amount above which a check is forced, and
-   the Products flagged as problematic.
-4. System checks that the percentage is between 0 and 100 and the amount is not negative.
+3. Loss Prevention Manager indicates the base percentage, the reduction per clean past validation, the
+   amount above which a check is forced, and the Products flagged as problematic.
+4. System checks that the base percentage is between 0 and 100 and that the reduction and the amount are
+   not negative.
 5. System records the Validation Policy of the Store (D6; no value is fixed by the model).
 
 **Alternative flows:** none.
@@ -469,17 +472,17 @@ Card.
 - 2.2. Return to 3.
 
 (2) [Cross Discount] (step 2)
-- 2.1. Campaign Manager indicates the Products whose purchase is required and the discount on the
-  covered Products.
+- 2.1. Campaign Manager indicates the Products whose purchase is required and the percentage off the
+  covered Products (D54).
 - 2.2. Return to 3.
 
 (3) [Card Credit Campaign] (step 2)
-- 2.1. Campaign Manager indicates the value credited to the card.
+- 2.1. Campaign Manager indicates the amount credited to the card for each covered item (D54).
 - 2.2. Return to 3.
 
 (4) [Coupon Campaign] (step 2)
-- 2.1. Campaign Manager indicates the discount, the Customer Cards that receive a coupon and the expiry
-  date.
+- 2.1. Campaign Manager indicates the percentage off (D54), the Customer Cards that receive a coupon and
+  the expiry date.
 - 2.2. System checks that the data is complete, that the end is after the start and that the cards exist.
 - 2.3. System records the Coupon Campaign and issues one Coupon, with the expiry date, to each Customer
   Card indicated (D12).
@@ -503,7 +506,8 @@ counts for payment; the Campaign Applications of the purchase are up to date.
 
 **Normal flow:**
 1. Actor indicates the line to void.
-2. System compares the line value with the Store's void threshold: it is not above it (D20).
+2. System compares the line value (unitPrice) with the Store's voidThreshold: it is not above it (D20,
+   D53).
    *Extension point: authorisation.*
 3. System records a Void of the Item Registration with voidedAt = now.
 4. System re-evaluates the Campaign Applications of the remaining counting lines (for example, a "buy
@@ -526,7 +530,7 @@ paid at a Station] (step 2)
 
 **Use Case:** Authorise void
 **Description:** A supervisor goes to the station and, with their card, authorises a void whose value is
-above the store's threshold. Extends UC14 at *authorisation* [voided line value above the store's void
+above the store's voidThreshold. Extends UC14 at *authorisation* [voided line value above the store's void
 threshold]. Actor: Supervisor.
 **Scenarios:** S3, S16
 **Pre-condition:** The Purchase is paid at a Station (assisted checkout or self-service station).

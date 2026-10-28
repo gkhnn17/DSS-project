@@ -1,5 +1,27 @@
-@startuml ucd_scan_telemovel
+@startuml ucd_phone_scan
 left to right direction
+skinparam backgroundColor White
+skinparam ArrowColor Black
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
 title Sub-diagram - Register and pay scan-while-shopping purchases
 
 actor Customer
@@ -26,6 +48,6 @@ UC08 ..> UC10 : <<include>>
 note right of UC08
   At a Self-Service Station working in
   Phone-Payment Mode. Extended by
-  "Validate purchase" (ucd_validacao.puml).
+  "Validate purchase" (ucd_validation.puml).
 end note
 @enduml

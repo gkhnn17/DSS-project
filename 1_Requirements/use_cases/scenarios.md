@@ -1,10 +1,10 @@
 # Use Case Model (Phase 1, step 2): scenarios, actors and use cases
 
 Source of truth: transcript in Appendix A of the assignment. Capitalised names such as Item
-Registration or Customer Card are the entities of `../dominio.puml`. Decisions D1-D30 are in
-`../decisoes_dominio.md`; D31-D50 (use case model) are in `decisoes_requisitos.md`.
-Diagrams: `ucd_geral.puml` (general) and six sub-diagrams `ucd_*.puml` (several diagrams, one model).
-Specifications: `especificacoes_use_cases.md`.
+Registration or Customer Card are the entities of `../domain.puml`. Decisions D1-D30 and D51-D55
+are in `../domain_decisions.md`; D31-D50 (use case model) are in `requirements_decisions.md`.
+Diagrams: `ucd_general.puml` (general) and six sub-diagrams `ucd_*.puml` (several diagrams, one model).
+Specifications: `use_case_specifications.md`.
 
 ## 1. Scenarios
 
@@ -152,23 +152,23 @@ payment terminal, bank and meal-card issuer (external, but they need nothing fro
 
 | Id | Use case | Primary actor(s) | Diagram | Scenarios |
 |---|---|---|---|---|
-| UC01 | Call next customer | Operator | ucd_lojas | S1 |
-| UC02 | Change station mode | Supervisor | ucd_lojas | S15 |
-| UC03 | Register assisted purchase | Operator, Customer | ucd_caixa_assistida | S1, S2, S3, S10, S14 |
+| UC01 | Call next customer | Operator | ucd_stores | S1 |
+| UC02 | Change station mode | Supervisor | ucd_stores | S15 |
+| UC03 | Register assisted purchase | Operator, Customer | ucd_assisted_checkout | S1, S2, S3, S10, S14 |
 | UC04 | Register self-checkout purchase | Customer | ucd_self_checkout | S4, S5, S13 |
-| UC05 | Weigh item in section | Customer | ucd_self_checkout, ucd_scan_telemovel | S4, S6, S7 |
-| UC06 | Start scan-while-shopping purchase | Customer | ucd_scan_telemovel | S6, S17 |
-| UC07 | Scan item with phone | Customer | ucd_scan_telemovel | S6, S7, S17 |
-| UC08 | Finish scan-while-shopping purchase | Customer | ucd_scan_telemovel | S6, S7, S8, S9, S10, S16 |
-| UC09 | Register item («include»d) | (actor of the including use case) | ucd_caixa_assistida, ucd_self_checkout, ucd_scan_telemovel, ucd_validacao | S1, S2, S4-S7, S9, S10, S12-S14 |
-| UC10 | Pay purchase («include»d) | (actor of the including use case) | ucd_caixa_assistida, ucd_self_checkout, ucd_scan_telemovel | S1, S2, S4-S10, S13, S14 |
-| UC11 | Validate purchase («extend»s UC08) | Staff Member | ucd_validacao | S8, S9, S10 |
-| UC12 | Configure validation policy | Loss Prevention Manager | ucd_validacao | S11 |
-| UC13 | Define campaign | Campaign Manager | ucd_campanhas | S12 |
-| UC14 | Void item | Operator, Customer | ucd_correcoes | S2, S3, S6, S16 |
-| UC15 | Authorise void («extend»s UC14) | Supervisor | ucd_correcoes | S3, S16 |
-| UC16 | Cancel purchase | Customer, Operator | ucd_correcoes | S13, S17 |
-| UC17 | Obtain monthly void report | Loss Prevention Manager | ucd_correcoes | S18 |
+| UC05 | Weigh item in section | Customer | ucd_self_checkout, ucd_phone_scan | S4, S6, S7 |
+| UC06 | Start scan-while-shopping purchase | Customer | ucd_phone_scan | S6, S17 |
+| UC07 | Scan item with phone | Customer | ucd_phone_scan | S6, S7, S17 |
+| UC08 | Finish scan-while-shopping purchase | Customer | ucd_phone_scan | S6, S7, S8, S9, S10, S16 |
+| UC09 | Register item («include»d) | (actor of the including use case) | ucd_assisted_checkout, ucd_self_checkout, ucd_phone_scan, ucd_validation | S1, S2, S4-S7, S9, S10, S12-S14 |
+| UC10 | Pay purchase («include»d) | (actor of the including use case) | ucd_assisted_checkout, ucd_self_checkout, ucd_phone_scan | S1, S2, S4-S10, S13, S14 |
+| UC11 | Validate purchase («extend»s UC08) | Staff Member | ucd_validation | S8, S9, S10 |
+| UC12 | Configure validation policy | Loss Prevention Manager | ucd_validation | S11 |
+| UC13 | Define campaign | Campaign Manager | ucd_campaigns | S12 |
+| UC14 | Void item | Operator, Customer | ucd_corrections | S2, S3, S6, S16 |
+| UC15 | Authorise void («extend»s UC14) | Supervisor | ucd_corrections | S3, S16 |
+| UC16 | Cancel purchase | Customer, Operator | ucd_corrections | S13, S17 |
+| UC17 | Obtain monthly void report | Loss Prevention Manager | ucd_corrections | S18 |
 
 Coarse use cases of the general diagram (each detailed in one sub-diagram): Operate stations and queues
 (UC01-UC02), Register and pay assisted purchases (UC03, UC09, UC10), Register and pay self-checkout
@@ -179,21 +179,21 @@ scan-while-shopping purchases (UC11, UC12), Manage campaigns (UC13), Correct pur
 
 | Scenario | Use cases | Domain entities used |
 |---|---|---|
-| S1 | UC01, UC03, UC09, UC10 | Store, Queue, Display, Station, Assisted Checkout, Operator, Assisted Purchase, Customer Card, Item Registration, Product, Checkout Scale, Weighing, Percentage Discount, Discount, Bank Card Payment, Purchase State |
+| S1 | UC01, UC03, UC09, UC10 | Store, Queue, Display, Station, Assisted Checkout, Operator, Assisted Purchase, Customer Card, Item Registration, Product (price), Weighed Product, Checkout Scale, Weighing, Percentage Discount, Discount, Bank Card Payment, Purchase State |
 | S2 | UC03, UC09, UC14, UC10 | Assisted Purchase, Operator, Item Registration, Quantity Discount, Campaign Application, Void, Cash Payment |
-| S3 | UC03, UC14, UC15 | Assisted Purchase, Item Registration, Void, Supervisor, Store |
-| S4 | UC05, UC04, UC09, UC10 | Section Scale, Weighing, Label, Self-Service Station, Self-Checkout Mode, Self-Checkout Purchase, Checkout Scale, Customer Card, Card Credit Campaign, Card Credit, Voucher Payment, Return Voucher, Bank Card Payment, Support Assistant |
-| S5 | UC04, UC09, UC10 | Self-Service Station, Self-Checkout Purchase, Food Product, Meal Card Payment, Bank Card Payment, Cash Payment |
-| S6 | UC06, UC07, UC05, UC09, UC14, UC08, UC10 | Scan-While-Shopping Purchase, Customer Card, Item Registration, Section Scale, Weighing, Label, Void, Phone-Payment Mode, Validation Policy, Card Balance Payment, Bank Card Payment |
-| S7 | UC05, UC07, UC09, UC08, UC10 | Weighing, Item Registration (registeredAt, unitPrice), Campaign (start, end), Percentage Discount, Quantity Discount, Campaign Application |
-| S8 | UC08, UC11, UC10 | Validation Policy, Validation, Support Assistant, No Discrepancy, Purchase State |
+| S3 | UC03, UC14, UC15 | Assisted Purchase, Item Registration, Void, Supervisor, Store (voidThreshold) |
+| S4 | UC05, UC04, UC09, UC10 | Section Scale, Weighed Product, Weighing, Label, Self-Service Station, Self-Checkout Mode, Self-Checkout Purchase, Checkout Scale, Customer Card, Card Credit Campaign (amount), Card Credit, Voucher Payment, Return Voucher, Bank Card Payment, Support Assistant |
+| S5 | UC04, UC09, UC10 | Self-Service Station, Self-Checkout Purchase, Food Product, Weighed Product, Meal Card Payment, Bank Card Payment, Cash Payment |
+| S6 | UC06, UC07, UC05, UC09, UC14, UC08, UC10 | Scan-While-Shopping Purchase, Customer Card, Item Registration, Section Scale, Weighed Product, Weighing, Label, Void, Phone-Payment Mode, Validation Policy, Card Balance Payment, Bank Card Payment |
+| S7 | UC05, UC07, UC09, UC08, UC10 | Weighed Product, Weighing, Item Registration (registeredAt, unitPrice), Campaign (start, end), Percentage Discount, Quantity Discount, Campaign Application |
+| S8 | UC08, UC11, UC10 | Validation Policy (cleanHistoryReduction), Validation, Support Assistant, No Discrepancy, Purchase State |
 | S9 | UC08, UC11, UC09, UC10 | Validation Policy (flagged Product), Validation, Small Discrepancy, Item Registration |
 | S10 | UC08, UC11, UC03, UC09, UC10 | Validation Policy (amountThreshold), Validation, Operator, Unexplained Discrepancy, Assisted Purchase, Purchase State |
-| S11 | UC12 | Store, Validation Policy, Product |
-| S12 | UC13 | Campaign, Percentage Discount, Quantity Discount, Cross Discount, Card Credit Campaign, Coupon Campaign, Coupon, Customer Card, Product |
+| S11 | UC12 | Store, Validation Policy (basePercentage, cleanHistoryReduction, amountThreshold), Product |
+| S12 | UC13 | Campaign, Percentage Discount, Quantity Discount, Cross Discount (percentage), Card Credit Campaign (amount), Coupon Campaign (percentage), Coupon, Customer Card, Product |
 | S13 | UC04, UC09, UC10, UC16 | Coupon, Discount, Customer Card, Voucher Payment, Return Voucher, Card Credit, Purchase State |
 | S14 | UC03, UC09, UC10 | Cross Discount, Percentage Discount, Campaign Application, Coupon (expiryDate), Voucher Payment, Return Voucher |
 | S15 | UC02 | Supervisor, Self-Service Station, Station Mode, Self-Checkout Mode, Phone-Payment Mode, Purchase |
-| S16 | UC14, UC08, UC15 | Scan-While-Shopping Purchase, Item Registration, Void, Supervisor |
+| S16 | UC14, UC08, UC15 | Scan-While-Shopping Purchase, Item Registration, Void, Supervisor, Store (voidThreshold) |
 | S17 | UC06, UC07, UC16 | Person, Customer Card, Scan-While-Shopping Purchase, Purchase State |
 | S18 | UC17 | Store, Void, Supervisor, Item Registration |

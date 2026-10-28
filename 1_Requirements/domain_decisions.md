@@ -1,16 +1,16 @@
 # Decision log: Domain Model (Phase 1)
 
-Source of truth: transcript in Appendix A of the assignment. Model files: `dominio.puml` (complete model)
-and the views `dominio_lojas.puml`, `dominio_compras.puml`, `dominio_validacao.puml`,
-`dominio_campanhas.puml`, `dominio_pagamento.puml` (subsets of the same model).
+Source of truth: transcript in Appendix A of the assignment. Model files: `domain.puml` (complete model)
+and the views `domain_stores.puml`, `domain_purchases.puml`, `domain_validation.puml`,
+`domain_campaigns.puml`, `domain_payment.puml` (subsets of the same model).
 Tags: **[confirmed by group]** = decided by the group; **[confirm with forum]** = default that depends on a
-client answer on the "Perguntas ao cliente" forum (question numbers Qn refer to the 2026-10-21 snapshot).
+client answer on the course's client questions forum (question numbers Qn refer to the 2026-10-21 snapshot).
 
 ## Model structure
 
 **D1 – One model, several diagrams**
 Open question: can the domain model be split into sub-models (forum Q1)?
-Decision: one model in `dominio.puml`; five view diagrams repeat only the classes of each area.
+Decision: one model in `domain.puml`; five view diagrams repeat only the classes of each area.
 Justification: "diagrams are not the models" (T03 s26): views improve readability without creating separate models.
 Depends: all `.puml` files. [confirm with forum]
 
@@ -199,6 +199,71 @@ Open question: is the threshold on the item or the total, which modes does it ap
 Decision: a Void cancels one line, and the line stays recorded. A Supervisor authorisation is needed when the voided line's value is above a store threshold, in all three modes (at the station). The monthly report is derived from the Voids (date, line, supervisor).
 Justification: a shared rule across modes (D3). "It's not the operator who decides."
 Depends: Void (voidedAt), Void–Item Registration, Void–Supervisor 0..1, note. [confirm with forum]
+
+## Gaps closed after the use case model (D51-D55)
+
+These entries continue the numbering of `use_cases/requirements_decisions.md` (D31-D50). Each one closes a
+value that a use case step needs but the domain model did not hold (see the "domain model gaps" section
+of that file).
+
+**D51 – Product has a current price**
+Open question: UC09 step 2 and UC05 step 2 take "the Product's price at that moment", but Product had no price.
+Decision: `Product.price : Decimal` holds only the current price. No price history is modelled: the price that
+was in force is kept as a snapshot in Item Registration.unitPrice (D8) and Weighing.price (D9).
+Justification: "the price that counts is the one at the moment the item was registered" implies that a product
+has a price that can change; the snapshots already answer every past-price question (the Ficha 02 e-commerce
+lesson: the price at purchase time lives on the line).
+Depends: Product (price), notes on Product and Item Registration, UC05, UC09. [confirm with forum]
+
+**D52 – Weighed Product is a kind of Product**
+Open question: UC09 alternative 2 and exception 3 depend on whether "the product is sold by weight"; nothing in
+the model said so.
+Decision: Weighed Product "is a" Product, like Food Product. A Weighing is "of" a Weighed Product (the
+association moved from Product). For a Weighed Product, Product.price is the price per unit of weight, and
+Weighing.price = weight x that price at weighedAt. A product may be both a Food Product and a Weighed Product
+(cheese).
+Justification: Alberto names "weighed items. Fruit, vegetables, cheese from the counter" as a kind of item with
+its own registration rules ("either they weigh it and scan the label or the item doesn't get registered").
+The course prefers a typed entity linked by "is a" to a flag attribute (T03 rules), and it is the same pattern
+as Food Product (D17).
+Depends: Weighed Product, Weighing–Weighed Product, note on Product, UC05, UC09. [confirm with forum]
+
+**D53 – The void threshold is an attribute of Store**
+Open question: UC14 step 2 and UC15 compare the voided line with "the store's threshold" (D20), which had no
+place in the model.
+Decision: `Store.voidThreshold : Decimal`. A void of a line whose unitPrice is above it needs a Supervisor's
+authorisation. No value is fixed by the model.
+Justification: Alberto: "above a certain amount I have to go over with my card and authorise it". D20 already
+decided that the threshold is set by the store; a single number needs no entity of its own.
+Depends: Store (voidThreshold), note on Void, UC14, UC15. [confirm with forum]
+
+**D54 – Values of Cross Discount, Coupon Campaign and Card Credit Campaign**
+Open question: only Percentage Discount and Quantity Discount had value attributes; UC09 cannot compute the
+other three, and UC13 asks the Campaign Manager for values with no place in the model.
+Decision: Cross Discount and Coupon Campaign have `percentage : Decimal` (percentage off the covered product's
+line). Card Credit Campaign has `amount : Decimal` (value credited to the card for each covered line).
+Justification: the transcript gives the value of a discount only as a percentage ("twenty per cent off that
+yoghurt"), so the cross discount ("the discount on product A") and the coupon reuse that form instead of
+inventing another. For the fifth kind "the campaign value is credited to their card", i.e. a value, which the
+scenarios (S4, S12) express as a fixed amount. A fixed-amount discount or a percentage card credit would need a
+client answer.
+Depends: Cross Discount, Coupon Campaign, Card Credit Campaign attributes, note on Campaign Application, UC09,
+UC13. [confirm with forum]
+
+**D55 – Clean history lowers the base percentage by a store-configured amount**
+Open question: UC08 step 4 reduces the chance of a check by the card's clean history (D5), but Validation Policy
+had no parameter saying by how much.
+Decision: `ValidationPolicy.cleanHistoryReduction : Decimal`: percentage points subtracted from basePercentage
+for each past Validation of the card that ended with No Discrepancy, never below 0. It is set by the store with
+the other parameters (UC12); no value is fixed by the model. Forced checks are not affected.
+Justification: Hélder: "someone who's been checked five times without a problem should be bothered less", and
+the trade-off "is not going to be settled by you" (D6), so the size of the reduction must be a business
+parameter, not a fixed rule.
+Depends: Validation Policy (cleanHistoryReduction), note on Validation Policy, UC08, UC12. [confirm with forum]
+
+Entity-name check: after D51-D55 every entity named in `use_cases/use_case_specifications.md` and
+`use_cases/scenarios.md` exists in `domain.puml` with the same name (actors such as Campaign Manager and Loss
+Prevention Manager are not domain entities, D28, D31). No other mismatch was found.
 
 ## Left out on purpose
 - **The system, screens, buttons, the "payment on hold" message**: these belong to the solution, not the problem (T03 rules).

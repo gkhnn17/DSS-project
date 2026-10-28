@@ -1,7 +1,29 @@
-@startuml ucd_geral
+@startuml ucd_general
 left to right direction
+skinparam backgroundColor White
+skinparam ArrowColor Black
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
 title Use Case Model - general diagram (coarse use cases; each one is detailed in a sub-diagram)
-' One model, several diagrams (T07 s30-31). Decisions D31-D50 in decisoes_requisitos.md.
+' One model, several diagrams (T07 s30-31). Decisions D31-D50 in requirements_decisions.md.
 
 actor Customer
 actor Operator
@@ -39,11 +61,11 @@ Customer -- GCorrect
 Supervisor -- GCorrect
 LPM -- GCorrect
 
-note right of GStations : ucd_lojas.puml
-note right of GAssisted : ucd_caixa_assistida.puml
+note right of GStations : ucd_stores.puml
+note right of GAssisted : ucd_assisted_checkout.puml
 note right of GSelf : ucd_self_checkout.puml
-note right of GPhone : ucd_scan_telemovel.puml
-note right of GValidation : ucd_validacao.puml
-note right of GCampaigns : ucd_campanhas.puml
-note right of GCorrect : ucd_correcoes.puml
+note right of GPhone : ucd_phone_scan.puml
+note right of GValidation : ucd_validation.puml
+note right of GCampaigns : ucd_campaigns.puml
+note right of GCorrect : ucd_corrections.puml
 @enduml

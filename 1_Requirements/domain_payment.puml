@@ -1,13 +1,16 @@
-@startuml dominio_pagamento
+@startuml domain_payment
 !include dss-dominio.iuml
 skinparam minClassWidth 120
-title View 5 - Payment instruments (subset of dominio.puml)
+title View 5 - Payment instruments (subset of domain.puml)
 
 class "Customer Card" as CustomerCard
 class "Food Product" as FoodProduct
 class "Item Registration" as ItemRegistration {
   registeredAt : DateTime
   unitPrice : Decimal
+}
+class Product {
+  price : Decimal
 }
 class "Bank Card Payment" as BankCardPayment
 class "Cash Payment" as CashPayment
