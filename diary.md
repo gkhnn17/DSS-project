@@ -10,6 +10,19 @@ Each entry records what went wrong and what stayed unclear, not what was done (t
 - The conversations are kept in the Claude Code session history and can be shown at the discussion.
 - The group reviews and takes responsibility for everything submitted; drafts are not final until each member can explain their part.
 
+## Group work (members)
+
+Gökhan Dumlupınar, Rufino Moreno and Alonso worked on every part of Phase 1 together; no part belongs to one member alone.
+
+- Transcript: all three read it and discussed the open points until we agreed on each one.
+- Domain model: all three checked every view (`domain_stores`, `domain_purchases`, `domain_validation`, `domain_campaigns`, `domain_payment`) and the full `domain.puml` against the transcript, and corrected what did not fit.
+- Use case model: all three went through the scenarios, the specifications and the use case diagrams, and changed what was unclear or unsupported.
+- Decision logs: all three confirmed or changed every decision in `domain_decisions.md` and `requirements_decisions.md`, including the gaps we found when we compared the two models (D51-D55).
+- Repository and diary: all three take part in keeping the repository, the diary and the declaration of AI use up to date.
+- Discussion: each member can explain every part of the submission.
+- The first drafts were made with the AI tools declared above; the group reviews and takes responsibility for the result.
+- The phases, deadlines and timeline are in `PROJECT_HISTORY.md`.
+
 ## Week of 26 October 2026 (entry dated 2026-10-28)
 
 - The transcript leaves many points open or contradictory (selection of purchases for validation, overlapping campaigns, payment order, family cards, cancellation with balance and vouchers, scales). We decided each one in the decision log, but several decisions are only our reading and depend on the forum answers, which we have not seen yet.
