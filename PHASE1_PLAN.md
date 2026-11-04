@@ -7,7 +7,7 @@ Specification: the transcript in Appendix A of the assignment. Nothing outside i
 
 | | **Member 1: Purchase modes** | **Member 2: Validation and control** | **Member 3: Pricing, campaigns, payment** |
 |---|---|---|---|
-| Name | _(fill in)_ | _(fill in)_ | _(fill in)_ |
+| Name | Gökhan Dumlupınar(e13319) | Rufino Moreno(e13425) | Alonso  |
 | Domain model views | `domain_stores`, `domain_purchases` | `domain_validation` | `domain_campaigns`, `domain_payment` |
 | Use cases | Assisted checkout, self-checkout, scan-while-shopping, weighed items, changing a station's mode | Validation, configuring the validation rule, voids and supervisor authorisation, monthly report | Defining and applying campaigns, coupons, payment with several instruments, cancelling a purchase |
 | Decision log | D3, D9, D21, D22, D25-D27, D30, D52 | D4-D7, D20, D29, D53, D55 | D8, D10-D19, D23, D24, D28, D51, D54 |

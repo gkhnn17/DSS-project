@@ -1,0 +1,20 @@
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local tool files (Claude Code settings and session data)
+.claude/
+CLAUDE.local.md
+
+
+# Temporary and scratch files
+*.tmp
+*.bak
+*.log
+scratch/
+tmp/
