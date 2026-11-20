@@ -8,6 +8,10 @@ Each entry: open question, decision, justification, what in the model depends on
 Forum status (snapshot 2026-11-16 and later posts up to 08/11): no answer from the teaching team to any question;
 every point below is therefore our own decision.
 
+Background (not a source): while designing we also thought about how a real supermarket chain such as Pingo Doce
+works from the customer's point of view. It added nothing to the model: every element of the design is supported by
+the transcript, the scope restriction or a recorded decision (assignment §8).
+
 ## A. Fixed by the scope restriction (recorded, not chosen)
 
 **D56 – Only the scan-as-you-shop mode is designed**
