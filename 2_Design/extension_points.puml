@@ -1,0 +1,187 @@
+@startuml extension_points
+' Conceptual classes behind the interfaces; dashed/grey = not implemented, shows where it fits (scope §3)
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam class<<future>> {
+  BackgroundColor #EEEEEE
+  BorderColor #888888
+  FontColor #555555
+  BorderStyle dashed
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+hide empty members
+left to right direction
+title Conceptual classes and extension points (Phase 2)
+
+package Purchases {
+  class ScanPurchase {
+    id
+    storeId
+    state : PurchaseState
+    total() : Money
+  }
+  class ItemLine {
+    registeredAt : DateTime
+    unitPrice : Money
+    weight : Decimal [0..1]
+    cancelledAt : DateTime [0..1]
+    counts() : boolean
+  }
+  enum PurchaseState {
+    Open
+    UnderVerification
+    ReadyToPay
+    Paid
+    NotAcceptable
+  }
+  ScanPurchase "1" *-- "*" ItemLine
+}
+
+package Catalog {
+  class Product {
+    code
+    price : Money
+  }
+  class WeighingLabel {
+    code
+    weight : Decimal
+    price : Money
+    weighedAt : DateTime
+  }
+  class LabelReading <<value>> {
+    unitPrice : Money
+    weight : Decimal [0..1]
+  }
+  WeighingLabel "*" --> "1" Product
+  LabelReading --> "1" Product
+}
+ItemLine "*" --> "1" Product
+
+package CustomerCards {
+  class CustomerCard {
+    id
+    balance : Money
+  }
+}
+ScanPurchase "*" --> "1" CustomerCard : D57
+
+package Campaigns {
+  abstract class Campaign {
+    start : DateTime
+    end : DateTime
+    isValidAt(t) : boolean
+    {abstract} evaluate(p : PurchaseView) : List<CampaignEffect>
+  }
+  interface CampaignEffect {
+    lines() : List<ItemLine>
+    discount() : Money
+    onPaid(card : CustomerCard)
+  }
+  class BuyTwoPayOne {
+    evaluate(p) : List<CampaignEffect>
+  }
+  class Discount {
+    amount : Money
+    discount() = amount
+    onPaid() = nothing
+  }
+  class PercentageCampaign <<future>>
+  class QuantityCampaign <<future>>
+  class CouponCampaign <<future>>
+  class CrossDiscountCampaign <<future>>
+  class CardCreditCampaign <<future>>
+  class CardCredit <<future>> {
+    discount() = 0
+    onPaid(card) : credit card
+  }
+  Campaign <|-- BuyTwoPayOne
+  Campaign <|-- PercentageCampaign
+  Campaign <|-- QuantityCampaign
+  Campaign <|-- CouponCampaign
+  Campaign <|-- CrossDiscountCampaign
+  Campaign <|-- CardCreditCampaign
+  CampaignEffect <|.. Discount
+  CampaignEffect <|.. CardCredit
+  Campaign "*" --> "*" Product : covers
+  BuyTwoPayOne ..> Discount : creates
+  CardCreditCampaign ..> CardCredit : creates
+}
+ScanPurchase "1" --> "*" CampaignEffect : effects (D66)
+
+package Payments {
+  interface PaymentInstrument {
+    maxAmount(p : PurchaseView) : Money
+    charge(amount) : boolean
+    release(amount)
+  }
+  class CardBalanceInstrument {
+    maxAmount = card balance
+  }
+  class BankCardInstrument {
+    maxAmount = no limit
+  }
+  class CashInstrument <<future>>
+  class MealCardInstrument <<future>> {
+    maxAmount = food lines (D17)
+  }
+  class ReturnVoucherInstrument <<future>> {
+    maxAmount = voucher amount (D18)
+  }
+  class PaymentPart {
+    amount : Money
+  }
+  PaymentInstrument <|.. CardBalanceInstrument
+  PaymentInstrument <|.. BankCardInstrument
+  PaymentInstrument <|.. CashInstrument
+  PaymentInstrument <|.. MealCardInstrument
+  PaymentInstrument <|.. ReturnVoucherInstrument
+  PaymentPart "*" --> "1" PaymentInstrument
+}
+ScanPurchase "1" --> "*" PaymentPart : paid with (D68)
+CardBalanceInstrument --> "1" CustomerCard
+
+package Verification {
+  interface VerificationStrategy {
+    mustVerify(paidPurchases : int) : boolean
+  }
+  class DecreasingProbabilityStrategy {
+    pBase : Decimal
+    f : Decimal
+    pMin : Decimal
+    mustVerify(n) : r < max(pMin, pBase * f^n)
+  }
+  class ForcedCheckStrategy <<future>>
+  class Verification {
+    staffId
+    startedAt : DateTime
+    endedAt : DateTime [0..1]
+    outcome : Outcome [0..1]
+  }
+  enum Outcome {
+    Compliant
+    NotAcceptable
+  }
+  VerificationStrategy <|.. DecreasingProbabilityStrategy
+  VerificationStrategy <|.. ForcedCheckStrategy
+}
+Verification "0..1" --> "1" ScanPurchase : checks
+
+note bottom of Campaigns
+  Grey classes are not implemented (scope §3): each one
+  is only a new subclass. ICampaigns, Purchases and Payments
+  do not change: Payments only sums discount() and calls
+  onPaid() after payment (D67).
+end note
+note bottom of Payments
+  IPayments checks that the parts add up to the total and that
+  each amount <= maxAmount; rules specific to an instrument
+  stay inside it (D69).
+end note
+@enduml

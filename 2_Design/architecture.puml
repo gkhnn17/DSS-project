@@ -1,0 +1,111 @@
+@startuml architecture
+' Conceptual architecture: subsystems and interfaces (D74)
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam interface {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+title Conceptual architecture - scan-as-you-shop (Phase 2)
+
+package "UI" {
+  [Customer App\n(phone)] as App
+  [Payment Station] as Station
+  [Staff App] as StaffApp
+}
+
+package "Business layer" {
+  interface ISupermarketLN
+  [SupermarketLN\n(facade)] as LN
+  LN -up- ISupermarketLN
+
+  [Purchases] as Purchases
+  interface IPurchases
+  Purchases -up- IPurchases
+
+  [Catalog] as Catalog
+  interface ICatalog
+  Catalog -up- ICatalog
+
+  [Campaigns] as Campaigns
+  interface ICampaigns
+  Campaigns -up- ICampaigns
+
+  [Payments] as Payments
+  interface IPayments
+  Payments -up- IPayments
+
+  [Verification] as Verification
+  interface IVerification
+  Verification -up- IVerification
+
+  [CustomerCards] as Cards
+  interface ICustomerCards
+  Cards -up- ICustomerCards
+}
+
+package "Data layer" {
+  [Purchase DAOs] as PDAO
+  [Catalog DAOs] as CatDAO
+  [Campaign DAOs] as CampDAO
+  [Card DAOs] as CardDAO
+  [Verification DAOs] as VDAO
+}
+
+interface IBankGateway
+[Bank (external)] as Bank
+Bank -up- IBankGateway
+
+App ..> ISupermarketLN : registerItem / cancelLine /\nstartPayment / pay
+Station ..> ISupermarketLN : startPayment / pay
+StaffApp ..> ISupermarketLN : pendingVerifications /\nmarkCompliant / markNotAcceptable
+
+LN ..> IPurchases
+LN ..> ICatalog
+LN ..> ICampaigns
+LN ..> IPayments
+LN ..> IVerification
+LN ..> ICustomerCards
+
+Payments ..> IPurchases
+Payments ..> IVerification
+Payments ..> ICustomerCards
+Payments ..> IBankGateway
+Verification ..> IPurchases
+Campaigns ..> IPurchases : PurchaseView
+
+Purchases ..> PDAO
+Catalog ..> CatDAO
+Campaigns ..> CampDAO
+Cards ..> CardDAO
+Verification ..> VDAO
+
+note right of Campaigns
+  Extension point 1 (scope §3):
+  new campaign type = new Campaign
+  subclass, nothing else changes
+  (D66, D67).
+end note
+note right of Payments
+  Extension point 2 (scope §3):
+  new payment instrument = new
+  PaymentInstrument class (D69).
+end note
+note right of Verification
+  Rule is a VerificationStrategy
+  (D61, D62).
+end note
+@enduml

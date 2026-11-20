@@ -1,0 +1,86 @@
+@startuml sd_pay_purchase
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Black
+  ArrowColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+title Pay for purchase - D60, D61, D68, D69, D72
+actor Customer
+participant "Payment Station" as St
+participant SupermarketLN as LN
+participant IPayments as Pay
+participant IPurchases as Purch
+participant IVerification as Ver
+participant ICustomerCards as Cards
+participant IBankGateway as Bank
+
+Customer -> St : start payment
+St -> LN : startPayment(purchaseId)
+LN -> Pay : startPayment(purchaseId)
+Pay -> Purch : view(purchaseId)
+alt state is not Open
+  Pay --> LN : error
+  LN --> St : refused (D72)
+else
+  Pay -> Ver : decide(purchaseId)
+  Ver -> Purch : countPaidPurchases(cardId)
+  Purch --> Ver : n
+  note right of Ver
+    strategy.mustVerify(n):
+    r < max(pMin, pBase * f^n)  (D61)
+  end note
+  alt purchase is verified
+    Ver -> Purch : changeState(UnderVerification)
+    Ver --> Pay : true
+    Pay --> LN : UnderVerification
+    LN --> St : "payment on hold, wait for staff"
+    note over Customer, Bank : continues in "Verify purchase". Payment resumes only if the outcome is Compliant.
+  else not verified
+    Ver --> Pay : false
+    Pay -> Purch : changeState(ReadyToPay)
+    Pay -> Cards : balance(cardId)
+    Pay --> LN : ReadyToPay(total, availableBalance)
+    LN --> St : total and available balance
+  end
+end
+
+== Payment (state ReadyToPay) ==
+Customer -> St : balance amount b, bank card
+St -> LN : pay(purchaseId, b, bankCardData)
+LN -> Pay : pay(purchaseId, [balance b, bank total-b])
+Pay -> Purch : view(purchaseId)
+alt state is NotAcceptable or not ReadyToPay
+  Pay --> LN : error "cannot be paid" (D59)
+else b > min(balance, total) or parts do not add up
+  Pay --> LN : error "invalid amounts"
+else
+  opt b > 0
+    Pay -> Cards : debit(cardId, b)
+  end
+  opt total - b > 0
+    Pay -> Bank : charge(bankCardData, total - b)
+    alt bank refuses
+      Bank --> Pay : refused
+      Pay -> Cards : credit(cardId, b)
+      note right: balance released, purchase stays ReadyToPay (D68)
+      Pay --> LN : error "bank card refused"
+      LN --> St : choose again
+    else bank accepts
+      Bank --> Pay : authorisation
+    end
+  end
+  Pay -> Purch : changeState(Paid)
+  note right: each effect.onPaid(card) is called once (D67)
+  Pay --> LN : Receipt
+  LN --> St : receipt
+end
+@enduml

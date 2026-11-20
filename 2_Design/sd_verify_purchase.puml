@@ -1,0 +1,62 @@
+@startuml sd_verify_purchase
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Black
+  ArrowColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+title Verify purchase - D59, D70, D71
+actor Customer
+actor "Staff Member" as Staff
+participant "Staff App" as SA
+participant "Customer App" as App
+participant SupermarketLN as LN
+participant IVerification as Ver
+participant IPurchases as Purch
+participant ICampaigns as Camp
+
+note over Customer, Staff : Purchase is UnderVerification (payment suspended, see "Pay for purchase")
+Staff -> SA : open pending verifications
+SA -> LN : pendingVerifications(storeId)
+LN -> Ver : pendingVerifications(storeId)
+Ver --> SA : list of purchases
+Staff -> SA : choose purchase
+SA -> LN : registeredItems(purchaseId)
+LN -> Purch : view(purchaseId)
+Purch --> SA : lines (cancelled ones marked)
+Staff -> Customer : compare the bags with the list
+
+opt items are missing from the list (D70)
+  Customer -> App : scan missing item
+  App -> LN : registerItem(purchaseId, labelCode)
+  LN -> Purch : addLine(...)
+  LN -> Camp : evaluate(PurchaseView)
+  LN -> Purch : setEffects(...)
+  note right: price and campaigns in force now. Lines cannot be cancelled in this state.
+  LN --> App : PurchaseSummary
+end
+
+alt everything matches (or missing items were registered)
+  Staff -> SA : mark compliant
+  SA -> LN : markCompliant(purchaseId, staffId)
+  LN -> Ver : markCompliant(purchaseId, staffId)
+  Ver -> Purch : changeState(ReadyToPay)
+  Ver --> SA : outcome recorded (staff, time, Compliant)
+  note over Customer : customer can pay (see "Pay for purchase")
+else not acceptable
+  Staff -> SA : mark not acceptable
+  SA -> LN : markNotAcceptable(purchaseId, staffId)
+  LN -> Ver : markNotAcceptable(purchaseId, staffId)
+  Ver -> Purch : changeState(NotAcceptable)
+  Ver --> SA : outcome recorded (staff, time, NotAcceptable)
+  note over Customer : final: can no longer be paid, record kept, what happens next is out of scope (D59)
+end
+@enduml

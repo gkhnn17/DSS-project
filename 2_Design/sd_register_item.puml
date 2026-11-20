@@ -1,0 +1,72 @@
+@startuml sd_register_item
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Black
+  ArrowColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+title Register item (and remove an item) - D57, D63, D64, D66
+actor Customer
+participant "Customer App" as App
+participant SupermarketLN as LN
+participant ICustomerCards as Cards
+participant IPurchases as Purch
+participant ICatalog as Cat
+participant ICampaigns as Camp
+
+== First scan: start the purchase ==
+Customer -> App : scan label
+App -> LN : startPurchase(cardId, storeId)
+LN -> Cards : exists(cardId)
+alt card unknown
+  LN --> App : error "unknown card"
+else card has an open purchase (D73)
+  LN --> App : error "purchase already open"
+else
+  LN -> Purch : startPurchase(cardId, storeId)
+  Purch --> LN : purchaseId (state Open)
+end
+
+== Register an item ==
+App -> LN : registerItem(purchaseId, labelCode)
+LN -> Cat : readLabel(labelCode)
+alt unknown label
+  Cat --> LN : error
+  LN --> App : "item not recognised"
+else
+  Cat --> LN : LabelReading(product, unitPrice, weight?)
+  LN -> Purch : addLine(purchaseId, reading, now)
+  note right: allowed in Open and UnderVerification (D70)
+  LN -> Purch : view(purchaseId)
+  Purch --> LN : PurchaseView
+  LN -> Camp : evaluate(PurchaseView)
+  Camp --> LN : effects (e.g. BuyTwoPayOne discounts)
+  LN -> Purch : setEffects(purchaseId, effects)
+  LN --> App : PurchaseSummary (lines, discounts, total)
+  App --> Customer : running total
+end
+
+== Remove a wrongly registered item (D63) ==
+Customer -> App : remove line
+App -> LN : cancelLine(purchaseId, lineId)
+LN -> Purch : cancelLine(purchaseId, lineId, now)
+alt state is not Open
+  Purch --> LN : error "payment already started"
+  LN --> App : refused
+else
+  note right: line is kept, marked cancelled
+  LN -> Purch : view(purchaseId)
+  LN -> Camp : evaluate(PurchaseView)
+  Camp --> LN : effects (a pair may be broken)
+  LN -> Purch : setEffects(purchaseId, effects)
+  LN --> App : PurchaseSummary
+end
+@enduml

@@ -1,0 +1,33 @@
+@startuml stm_purchase
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam state {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+title Purchase life cycle (scan-as-you-shop) - D59, D63, D70, D72
+[*] --> Open : startPurchase(card)
+Open --> Open : registerItem / cancelLine
+Open --> UnderVerification : startPayment [mustVerify]
+Open --> ReadyToPay : startPayment [not selected]
+UnderVerification --> UnderVerification : registerItem (missing items)
+UnderVerification --> ReadyToPay : markCompliant
+UnderVerification --> NotAcceptable : markNotAcceptable
+ReadyToPay --> ReadyToPay : pay refused (bank)
+ReadyToPay --> Paid : pay [parts = total]
+Paid --> [*]
+NotAcceptable --> [*]
+note right of NotAcceptable
+  Final: cannot be paid, record kept.
+  What happens next is outside the scope.
+end note
+note right of Open
+  Lines can be cancelled only here.
+  At most one open purchase per card (D73).
+end note
+@enduml
