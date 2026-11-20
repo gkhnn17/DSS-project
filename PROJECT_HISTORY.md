@@ -7,7 +7,7 @@ The use of generative AI for first drafts is declared in `diary.md` and is not r
 
 | Phase | Content | Deadline | Status |
 |---|---|---|---|
-| 1 | Requirements analysis: domain model, use case model, decision log | 23 Oct 2026, 23:59 | Submitted; feedback is in the repository issue «Avaliação — Fase 1 (Requisitos)» |
+| 1 | Requirements analysis: domain model, use case model, decision log | 23 Oct 2026, 23:59 | Submitted; no teacher feedback seen (the repository has no issues, checked 2026-11-20) |
 | 2 | Architecture and design | 20 Nov 2026, 23:59 | Open |
 | Final | Revised models and system | 23 Dec 2026 (slide says 12:00, assignment says 23:59: check) | Open |
 | Presentation | Discussion; every member explains their part | Week of 4-8 Jan 2027 | Open |
@@ -31,7 +31,7 @@ We split the writing between us (purchase modes, validation and control, pricing
 | 2026-10-28 | Use case model draft, use case decisions, work split |
 | 2026-10-28 | Domain gaps closed (D51-D55), files renamed to English, use case diagrams redone |
 | 2026-10-28 | Project diary with AI-use declaration and first weekly entry |
-| 2026-11-04 | Phase 1 feedback issue posted by the teachers; we read it and answer in the issue |
+| 2026-11-20 | Phase 2 design written (`2_Design/`, D56-D74); no Phase 1 feedback found in the repository |
 
 ## Open points (from the diary)
 - Several decisions are only our reading of the transcript and depend on forum answers.
