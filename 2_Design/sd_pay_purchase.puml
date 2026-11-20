@@ -33,10 +33,10 @@ alt state is not Open
 else
   Pay -> Ver : decide(purchaseId)
   Ver -> Purch : countPaidPurchases(cardId)
-  Purch --> Ver : n
+  Purch --> Ver : paidPurchases (number of Paid purchases of the card)
   note right of Ver
-    strategy.mustVerify(n):
-    r < max(pMin, pBase * f^n)  (D61)
+    strategy.mustVerify(paidPurchases):
+    r < max(pMin, pBase * f^paidPurchases)  (D61)
   end note
   alt purchase is verified
     Ver -> Purch : changeState(UnderVerification)

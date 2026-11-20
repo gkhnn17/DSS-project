@@ -155,7 +155,7 @@ package Verification {
     pBase : Decimal
     f : Decimal
     pMin : Decimal
-    mustVerify(n) : r < max(pMin, pBase * f^n)
+    mustVerify(paidPurchases) : r < max(pMin, pBase * f^paidPurchases)
   }
   class ForcedCheckStrategy <<future>>
   class Verification {

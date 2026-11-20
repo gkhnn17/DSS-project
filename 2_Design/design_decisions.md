@@ -39,7 +39,7 @@ Justification: the scope restriction counts purchases, not verifications; D5 (on
 match that wording any more. "Made" is read as "completed", i.e. paid.
 Depends: `IPurchases.countPaidPurchases(cardId)`, `VerificationStrategy.mustVerify`, sequence "Pay for purchase".
 
-**D61 – Probability formula: p(n) = max(pMin, pBase × f^n), parameters per store**
+**D61 – Probability formula: p(n) = max(pMin, pBase × f^n), parameters per store (n = paidPurchases, D60)**
 Open question: the scope restriction fixes only that the probability "decreases" with n.
 Decision: `DecreasingProbabilityStrategy` with three store parameters: pBase (probability for a first purchase),
 f (0 < f < 1, factor per previous purchase) and pMin (floor, > 0). A random number r in [0,1) is drawn;
